@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Цветовой круг · Стильно с Медведевой</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#EEE7DE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Цветовой круг">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEE7DE;--card:#F7F2EB;--ink:#3A3432;--mute:#7A6E68;--line:#D9CFC4;--accent:#8A5A3B}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:21px/1.45 Manrope,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 12px 48px}
+h1{font:600 40px/1.05 "Cormorant Garamond",serif;margin:2px 0 0;text-align:center}
+h2{font:600 30px/1.1 "Cormorant Garamond",serif;margin:0 0 8px}
+.sub{color:var(--mute);letter-spacing:.1em;text-transform:uppercase;font-size:15px;text-align:center}
+.tabs{display:flex;gap:8px;margin:12px 0;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+.tabs button{flex:1;border:1px solid var(--line);background:transparent;border-radius:999px;padding:16px 6px;font:700 20px Manrope;color:var(--ink)}
+#svgwheel{width:100%;height:auto;max-width:520px;touch-action:none;-webkit-user-select:none;user-select:none}
+#svgwheel path[data-h]{fill:transparent}#svgwheel [data-h]{cursor:pointer}
+#svgwheel .sel{stroke:#fff;stroke-width:4;filter:drop-shadow(0 0 4px rgba(0,0,0,.45))}
+.big{display:flex;align-items:center;gap:14px}
+.big i{width:88px;height:88px;border-radius:50%;flex:none;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.big .nm{font:600 40px/1.05 "Cormorant Garamond",serif}
+.big .rg{color:var(--mute);font-size:19px}
+#pairRes,#result{scroll-margin-top:84px}
+.step{font-size:20px;margin:16px 0 10px}
+.toast{position:fixed;left:12px;right:12px;bottom:max(14px,env(safe-area-inset-bottom));max-width:536px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:18px;padding:12px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:17px;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.hidden{display:none}
+.toast button{border:0;border-radius:12px;background:var(--bg);color:var(--ink);font:700 16px Manrope;padding:10px 12px;white-space:nowrap}
+.hint{text-align:center;color:var(--ink);font-size:21px;font-weight:600;margin:4px 0 0}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{background:var(--card);border-radius:18px;padding:18px;margin:12px 0}
+.ring{display:flex;gap:10px;align-items:baseline;margin-top:6px}
+.num{font:700 15px Manrope,sans-serif;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;flex:none;align-self:center}
+.rname{font-weight:700;font-size:22px}
+.rdesc{color:var(--mute);font-size:19px}
+.sw{display:flex;flex-wrap:wrap;gap:14px 3%;margin-top:12px}
+.dot{width:31%;text-align:center;font-size:18px;font-weight:600;color:var(--ink);line-height:1.2;cursor:pointer;background:none;border:0;padding:0}
+.dot i{display:block;width:78px;height:78px;border-radius:50%;margin:0 auto 5px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.dot.sel i{outline:3px solid var(--ink);outline-offset:2px}
+svg{display:block;margin:0 auto;max-width:100%}
+.picked{display:flex;flex-wrap:wrap;gap:10px;min-height:56px;align-items:center}
+.chip{display:flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font-size:19px}
+.chip i{width:52px;height:52px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+.chip b{font-weight:700}
+.chip button{border:0;background:none;font-size:26px;color:var(--mute);padding:0 2px}
+.res h3{font:600 44px/1.05 "Cormorant Garamond",serif;margin:0}
+.meter{height:8px;border-radius:8px;background:linear-gradient(90deg,#A3AE94,#C9A9A0,#D62828);position:relative;margin:12px 0 4px}
+.meter span{position:absolute;top:-5px;width:18px;height:18px;border-radius:50%;background:var(--ink);border:3px solid var(--card);transform:translateX(-50%)}
+.scale{display:flex;justify-content:space-between;font-size:17px;color:var(--mute)}
+.tip{border-left:4px solid var(--accent);padding:4px 0 4px 14px;margin:14px 0;font-size:20px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.pill{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:16px 8px;font:700 19px Manrope;color:var(--ink)}
+.pill.on{background:var(--ink);color:var(--bg)}
+.btn{display:inline-block;border:0;border-radius:16px;background:var(--ink);color:var(--bg);padding:16px 18px;font:700 19px Manrope}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+canvas{width:100%;border-radius:12px;touch-action:none;display:none}
+.muted{color:var(--mute);font-size:19px}
+footer{margin-top:28px;color:var(--mute);font-size:15px;text-align:center}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sub">Стильно с Медведевой</div>
+  <h1>Цветовой круг</h1>
+
+  <div class="tabs">
+    <button data-t="wheel" class="on">С чем носить</button>
+    <button data-t="check">Проверь образ</button>
+  </div>
+
+  <!-- КРУГ + ПАРА -->
+  <section id="wheel">
+    <svg id="svgwheel" viewBox="-160 -160 320 320"></svg>
+    <div class="hint" id="whint">Нажмите на цвет вашей вещи 👆</div>
+    <div class="card res hidden" id="pairRes"></div>
+    <details class="card"><summary style="font-weight:700">Что значат 4 кольца</summary><div id="rings"></div></details>
+  </section>
+
+  <!-- ПРОВЕРЬ ОБРАЗ -->
+  <section id="check" class="hidden">
+    <div class="card">
+      <h2>Проверь свой образ</h2>
+      <div class="step"><b>1.</b> Загрузите фото образа</div>
+      <label class="btn" style="display:block;text-align:center">📷 Загрузить фото<input type="file" id="photo" accept="image/*" style="display:none"></label>
+      <div class="step" id="cvhint" style="display:none"><b>2.</b> Нажмите на фото на каждую вещь: верх, низ, обувь, сумку. Хватит 2–4 нажатий</div>
+      <canvas id="cv"></canvas>
+      <div class="step" id="pickedTitle" style="display:none"><b>Вещи в образе:</b></div>
+      <div class="picked" id="picked"></div>
+      <div class="row">
+        <label class="btn ghost">🎨 Добавить цвет вручную<input type="color" id="custom" value="#8e8392" style="width:0;height:0;opacity:0;position:absolute"></label>
+        <button class="btn ghost" id="clear">Начать заново</button>
+      </div>
+    </div>
+    <div class="card res" id="result"></div>
+    <div class="card"><div class="muted">Нет фото? Выберите цвета вещей здесь:</div><div id="palette"></div></div>
+    <div id="toast" class="toast hidden"><span id="toastTxt"></span><button id="toastGo">Смотреть разбор ↓</button></div>
+  </section>
+
+
+  <footer>По мотивам принципа колец Эми Смилович (Tibi). Подсказки — ориентир, а не закон: круг можно «крутить».</footer>
+</div>
+
+<script>
+const RINGS = {
+ 1:{name:"Чёрный", mood:"сильный, резкий, графичный",
+    colors:[["Чёрный","#141414"]]},
+ 2:{name:"Классические нейтрали", mood:"предсказуемо, чётко, надёжно",
+    colors:[["Белый","#F8F6F1"],["Экрю","#ECE3D0"],["Беж","#D8C3A5"],["Тан","#C19A6B"],["Коричневый","#5C3A21"],["Шоколад","#3B271C"],["Серый","#9A9A98"],["Графит","#3D3F42"],["Нэви","#1F2A44"],["Хаки","#7A7350"]]},
+ 3:{name:"Цвета «без названия»", mood:"спокойно, тонко, «клей гардероба»",
+    colors:[["Карамель","#B07D52"],["Пекан","#8A5A3B"],["Шалфей","#A3AE94"],["Тауп","#8B7D72"],["Лилово-серый","#8E8392"],["Сине-серый","#7D8C99"],["Выцветший деним","#8DA3B8"],["Горчичный","#B8963E"],["Пыльная роза","#B58E8A"],["Лотос","#C9A9A0"],["Ржавый","#9A5B3C"],["Бордо","#5E2129"],["Слива","#5B3A4C"]]},
+ 4:{name:"Яркие и пастели", mood:"радостно, энергично, заметно",
+    colors:[["Красный","#D62828"],["Фуксия","#D0217A"],["Оранжевый","#F06A1E"],["Бэби-жёлтый","#F7E58C"],["Лайм","#A8D820"],["Зелёный","#1E9E5A"],["Мятный","#9EE6C8"],["Бирюза","#1FB8B0"],["Кобальт","#1F4FD8"],["Лаванда","#B7A7E8"],["Пастельно-розовый","#F7B8C8"]]}
+};
+const COMBO = {
+ "1":["Монохром в чёрном","строго и графично","Чтобы не было плоско — добавьте фактуру или одну вещь из кольца 3."],
+ "2":["Нейтральная база","спокойно и надёжно","Хочется живее — добавьте кольцо 3 (мягко) или кольцо 4 (заметно)."],
+ "3":["Всё в кольце 3","очень расслабленно, мягко","Чтобы «поднять» образ — добавьте яркий белый или одну вещь кольца 4."],
+ "4":["Всё яркое","максимум энергии — «тонна» цвета","Если слишком — замените одну вещь на кольцо 3."],
+ "1-2":["Собранно","деловой, серьёзный, городской минимализм","Классика, которая всегда работает. Для мягкости — аксессуар кольца 3."],
+ "1-3":["Утончённо","нюансно, «умнее», чем просто чёрное","Например, всё чёрное + пальто горчичного или карамельного цвета."],
+ "1-4":["Смело","яркий контраст, весело, иногда резко","Яркой вещи нужна структура: чёткий крой, а не простая футболка."],
+ "2-3":["Шик и ум","спокойная изысканность","Нэви + лилово-серый, серый + шалфей — тихая роскошь."],
+ "2-4":["Классика погромче","чётко и заметно, не для спокойного дня","Если нужно спокойнее — замените яркое на его «приглушённую» версию из кольца 3."],
+ "3-4":["Мягкий акцент","яркое смягчено, появляется глубина","Например, красное платье + обувь цвета бордо."]
+};
+const ORDER = ["1","2","3","4"];
+let picked = [];
+let pairColor = null, mood = "calm";
+
+/* ---------- цвет → кольцо ---------- */
+function hex2hsl(h){h=h.replace('#','');const r=parseInt(h.substr(0,2),16)/255,g=parseInt(h.substr(2,2),16)/255,b=parseInt(h.substr(4,2),16)/255;
+ const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let H=0,S=0,L=(mx+mn)/2;
+ if(mx!==mn){const d=mx-mn;S=L>.5?d/(2-mx-mn):d/(mx+mn);
+  H=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;H*=60}
+ return [H,S,L]}
+function classify(hex){
+ for(const r of ORDER) for(const c of RINGS[r].colors) if(c[1].toLowerCase()===hex.toLowerCase()) return {ring:+r,name:c[0]};
+ const [h,s,l]=hex2hsl(hex);
+ // фото: тёплый/холодный свет даёт белому и чёрному лёгкий оттенок — почти бесцветное считаем белым/серым/чёрным
+ const chroma=(()=>{const c=rgb(hex);return (Math.max(...c)-Math.min(...c))/255})();
+ if(l<0.16 || (l<0.24&&chroma<0.08)) return {ring:1,name:"≈ Чёрный"};
+ if(l>0.78 && chroma<0.16) return {ring:2,name:"≈ Белый"};
+ if(l>0.68 && chroma<0.10) return {ring:2,name:"≈ Светло-серый"};
+ if(chroma<0.07) return {ring:2,name:l>0.45?"≈ Серый":"≈ Графит"};
+ const nb=nearest(hex);
+ if(nb.d<45) return {ring:nb.ring, name:"≈ "+nb.name};
+ let ring;
+ if(l<0.12) ring=1;
+ else if(s<0.10 || l>0.93) ring=2;                                  // белый, серые, графит
+ else if(h>=200&&h<=250&&l<0.32&&s<0.6) ring=2;                     // нэви
+ else if(h>=15&&h<=50&&l<0.33&&s<0.55) ring=2;                      // коричневые
+ else if(h>=25&&h<=50&&s<0.45&&l>0.6) ring=2;                       // беж, тан
+ else if((s>0.6&&l>0.3&&l<0.72)||(l>=0.72&&s>0.55)) ring=4;         // яркие и пастели
+ else ring=3;                                                        // приглушённые
+ return {ring, name: nearestName(hex)};
+}
+function nearest(hex){let best=null,bd=1e9;const a=rgb(hex);
+ for(const r of ORDER) for(const c of RINGS[r].colors){const b=rgb(c[1]);
+  const d=Math.sqrt(2*(a[0]-b[0])**2+4*(a[1]-b[1])**2+3*(a[2]-b[2])**2)/3;if(d<bd){bd=d;best={name:c[0],ring:+r,d}}}
+ return best}
+function nearestName(hex){return "похож на «"+nearest(hex).name+"»"}
+function rgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16))}
+
+/* ---------- отрисовка ---------- */
+function swatches(onPick, selected){
+ return ORDER.map(r=>`<div class="ring"><span class="num">${r}</span><span class="rname">${RINGS[r].name}</span></div>
+  <div class="sw">${RINGS[r].colors.map(c=>`<button class="dot ${selected===c[1]?'sel':''}" data-h="${c[1]}" data-n="${c[0]}" data-r="${r}"><i style="background:${c[1]}"></i>${c[0]}</button>`).join('')}</div>`).join('');
+}
+function drawWheel(){
+ const svg=document.getElementById('svgwheel');
+ // Стопка матовых дисков, как у физического круга: снизу самый большой (кольцо 4), сверху меньше, в центре чёрная «шляпка».
+ // У каждого диска своя неподвижная тень (видно, что слои лежат друг на друге) и свой поворот.
+ const R_OUT={1:34,2:72,3:112,4:152};
+ const p=(rad,a)=>[rad*Math.cos(a),rad*Math.sin(a)];
+ const wedge=(r0,r1,a0,a1)=>{const [x0,y0]=p(r1,a0),[x1,y1]=p(r1,a1),[x2,y2]=p(r0,a1),[x3,y3]=p(r0,a0);
+   return `M${x0},${y0}A${r1},${r1} 0 0 1 ${x1},${y1}L${x2},${y2}A${r0},${r0} 0 0 0 ${x3},${y3}Z`};
+ let out='';
+ for(const r of ["4","3","2","1"]){
+  const r1=R_OUT[r], r0=r==="1"?0:R_OUT[+r-1];
+  // тень диска (не крутится)
+  out+=`<circle r="${r1}" fill="#000" opacity="${r==='4'?.22:.28}" filter="url(#blur${r==='4'?'L':'S'})" transform="translate(0 ${r==='4'?6:3.5})" pointer-events="none"/>`;
+  let html='';
+  if(r==="1"){const c=RINGS[1].colors[0];
+   html=`<circle class="hit" r="34" fill="url(#cap)" data-h="${c[1]}" data-n="${c[0]}" data-r="1"/>`}
+  else{const cols=RINGS[r].colors,n=cols.length;
+   cols.forEach((c,i)=>{const a0=i/n*2*Math.PI-Math.PI/2,a1=(i+1)/n*2*Math.PI-Math.PI/2;
+    // видимая часть сегмента; под верхним диском он продолжается внутрь (без щелей при вращении)
+    html+=`<path class="seg" d="${wedge(Math.max(0,r0-6),r1,a0,a1)}" fill="${c[1]}" pointer-events="none"/>`;
+    html+=`<path d="${wedge(r0,r1,a0,a1)}" data-h="${c[1]}" data-n="${c[0]}" data-r="${r}"><title>${c[0]} · кольцо ${r}</title></path>`});
+   html+=`<g stroke="rgba(255,255,255,.35)" stroke-width=".7" pointer-events="none">${cols.map((_,i)=>{const a=i/n*2*Math.PI-Math.PI/2;const [x,y]=p(r1,a),[x2,y2]=p(r0,a);return `<line x1="${x2}" y1="${y2}" x2="${x}" y2="${y}"/>`}).join('')}</g>`;
+  }
+  // кромка диска: светлый ободок даёт толщину
+  html+=`<circle r="${r1-.6}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2" pointer-events="none"/>`;
+  out+=`<g class="ringL" data-ring="${r}">${html}</g>`;
+ }
+ svg.innerHTML=`<defs>
+  <filter id="blurL" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+  <filter id="blurS" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
+  <radialGradient id="cap" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#3a3a3a"/><stop offset=".6" stop-color="#1c1c1c"/><stop offset="1" stop-color="#111"/></radialGradient>
+  <radialGradient id="light" cx="35%" cy="25%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></radialGradient>
+  <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".1"/></feComponentTransfer></filter>
+  <clipPath id="disc"><circle r="152"/></clipPath>
+ </defs>${out}
+ <g pointer-events="none" clip-path="url(#disc)"><circle r="152" fill="url(#light)"/><rect x="-152" y="-152" width="304" height="304" filter="url(#grain)" style="mix-blend-mode:multiply"/></g>`;
+ initSpin(svg);
+}
+/* ---------- вращение круга: сам медленно крутится, пальцем — с инерцией, тап выбирает цвет ---------- */
+function initSpin(svg){
+ // у каждого кольца свой угол, скорость и направление
+ const R={};svg.querySelectorAll('.ringL').forEach(g=>{const k=+g.dataset.ring;R[k]={g,ang:0,vel:0,auto:{1:0.05,2:0.07,3:-0.05,4:0.035}[k]}});
+ let drag=null,last=null,lastT=0,moved=0,startEl=null,idle=true,idleTimer=null;
+ const center=()=>{const r=svg.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2,r.width/320]};
+ const angleAt=e=>{const [cx,cy]=center();return Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI};
+ const ringAt=e=>{const [cx,cy,k]=center();const d=Math.hypot(e.clientX-cx,e.clientY-cy)/k;return d<35?1:d<73.5?2:d<113.5?3:4};
+ const apply=o=>o.g.setAttribute('transform',`rotate(${o.ang})`);
+ function frame(){
+  for(const k in R){const o=R[k];if(drag===o)continue;
+   if(Math.abs(o.vel)>0.02){o.ang+=o.vel;o.vel*=0.95} else if(idle){o.ang+=o.auto} apply(o)}
+  requestAnimationFrame(frame)}
+ svg.addEventListener('pointerdown',e=>{drag=R[ringAt(e)];idle=false;clearTimeout(idleTimer);drag.vel=0;last=angleAt(e);lastT=performance.now();moved=0;
+  startEl=e.target.closest('[data-h]');svg.setPointerCapture(e.pointerId)});
+ svg.addEventListener('pointermove',e=>{if(!drag)return;const a=angleAt(e);let d=a-last;if(d>180)d-=360;if(d<-180)d+=360;
+  drag.ang+=d;moved+=Math.abs(d);const t=performance.now();drag.vel=d/Math.max(1,(t-lastT)/16.7);last=a;lastT=t;apply(drag)});
+ const end=e=>{if(!drag)return;const o=drag;drag=null;
+  if(moved<4&&startEl){o.vel=0;pick(startEl)}            // короткое нажатие = выбор цвета
+  else{idleTimer=setTimeout(()=>{if(!pairColor)idle=true},6000)}};
+ svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+ function pick(el){svg.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');
+  pairColor={hex:el.dataset.h,name:el.dataset.n,ring:+el.dataset.r};renderPair();
+  document.getElementById('pairRes').scrollIntoView({behavior:'smooth',block:'start'})}
+ // приветственный оборот: кольца раскручиваются в разные стороны
+ R[2].vel=5;R[3].vel=-6;R[4].vel=4;requestAnimationFrame(frame);
+}
+function ringsInfo(){
+ document.getElementById('rings').innerHTML=ORDER.map(r=>`<div style="margin-top:14px"><div class="ring"><span class="num">${r}</span><span class="rname">${RINGS[r].name}</span></div>
+   <div class="rdesc">${RINGS[r].mood}${r==='3'?'. Тест: если цвет трудно назвать одним словом — это кольцо 3.':''}</div></div>`).join('')
+   +'<div class="tip">Чем дальше кольца в образе друг от друга — тем больше энергии. Чем ближе — тем спокойнее.</div>';
+}
+function bindDots(container, fn){container.querySelectorAll('.dot').forEach(b=>b.onclick=()=>fn(b.dataset.h,b.dataset.n,+b.dataset.r))}
+
+function addPicked(hex,name,ring){if(picked.length>=6)picked.shift();picked.push({hex,name,ring});renderCheck()}
+function renderCheck(){
+ const box=document.getElementById('picked');
+ box.innerHTML=picked.length?picked.map((p,i)=>`<span class="chip"><i style="background:${p.hex}"></i><span>${p.name}<br><b>кольцо ${p.ring}</b></span><button data-i="${i}">×</button></span>`).join(''):'<span class="muted">Пока пусто</span>';
+ box.querySelectorAll('button').forEach(b=>b.onclick=()=>{picked.splice(+b.dataset.i,1);renderCheck()});
+ const res=document.getElementById('result');
+ document.getElementById('pickedTitle').style.display=picked.length?'block':'none';
+ if(picked.length<1){res.innerHTML='<div class="step" style="margin:0"><b>3.</b> Здесь появится разбор: какое настроение у образа и как его подправить.</div>';return}
+ if(picked.length<2){res.innerHTML=`<div class="step" style="margin:0">Есть 1 вещь — <b>${picked[0].name}</b> (кольцо ${picked[0].ring}).<br>Добавьте ещё хотя бы одну, чтобы увидеть разбор.</div>`;return}
+ const rings=[...new Set(picked.map(p=>p.ring))].sort();
+ const mn=rings[0],mx=rings[rings.length-1],dist=mx-mn;
+ const key=rings.length===1?String(mn):`${mn}-${mx}`;
+ const [title,feel,advice]=COMBO[key];
+ const r4=picked.filter(p=>p.ring===4).length;
+ const energy=Math.min(100,dist*28+r4*10+(rings.includes(1)&&rings.includes(4)?6:0));
+ let otn=r4===0?"«None» — без цветного акцента, тонально.":r4===1?"«One» — один цветной акцент: глаз сразу находит фокус.":r4===2?"Два ярких акцента могут спорить: оставьте один — или добавьте ещё, чтобы получилась «тонна».":"«Ton» — много цвета, и он читается цельно.";
+ let tips=[advice];
+ if(rings.length===3){const mid=rings[1];tips.push(`Кольцо ${mid} работает как связка между ${mn} и ${mx} — образ становится цельнее.`)}
+ if(dist<=1&&r4===0) tips.push('Кажется плоским? «Перепрыгните» кольцо или добавьте кольцо 4.');
+ if(rings.includes(1)&&rings.includes(4)) tips.push('Слишком громко? Замените одну вещь на кольцо 3 — энергия станет мягче.');
+ res.innerHTML=`<div class="sub">Разбор образа · кольца ${rings.join(' + ')}</div><h3>${title}</h3><div style="font-size:21px">Ваш образ читается так: <b>${feel}</b></div>
+  <div class="meter"><span style="left:${Math.max(4,energy)}%"></span></div><div class="scale"><span>спокойно</span><span>классика</span><span>смело</span></div>
+  ${tips.map(t=>`<div class="tip">${t}</div>`).join('')}<div class="tip">${otn}</div>`;
+}
+
+function renderPair(){
+ const res=document.getElementById('pairRes');
+ if(!pairColor){res.classList.add('hidden');return}
+ res.classList.remove('hidden');document.getElementById('whint').style.display='none';
+ const r=pairColor.ring;
+ const MAP={calm:{1:[2,1],2:[3,2],3:[2,3],4:[3,4]},
+            classic:{1:[2],2:[1,4],3:[2,1],4:[2]},
+            bold:{1:[4],2:[4],3:[4,1],4:[1,4]}};
+ const targets=MAP[mood][r];
+ const moodName={calm:'Спокойно',classic:'Классика',bold:'Смело'}[mood];
+ res.innerHTML=`<div class="big"><i style="background:${pairColor.hex}"></i><div><div class="nm">${pairColor.name}</div><div class="rg">кольцо ${r} · ${RINGS[r].name.toLowerCase()}</div></div></div>
+  <div class="row" id="moods" style="margin-top:16px">${['calm','classic','bold'].map(m=>`<button class="pill ${m===mood?'on':''}" data-m="${m}">${{calm:'Спокойно',classic:'Классика',bold:'Смело'}[m]}</button>`).join('')}</div>
+  ${targets.map(t=>{const key=[r,t].sort().join('-');const c=r===t?COMBO[String(r)]:COMBO[key];
+   return `<div style="margin-top:16px"><div style="font:600 34px/1.1 'Cormorant Garamond',serif">${c?c[0]:''}</div><div class="rdesc">${c?c[1]:''} · кольцо ${t}</div>
+   <div class="sw">${RINGS[t].colors.filter(c=>c[1]!==pairColor.hex).map(c=>`<span class="dot"><i style="background:${c[1]}"></i>${c[0]}</span>`).join('')}</div></div>`}).join('')}
+  <div class="tip">${mood==='bold'?'Яркой вещи нужен чёткий крой. Если слишком — смягчите аксессуаром кольца 3.':mood==='classic'?'Через одно кольцо — заметно, но без перегруза.':'Соседние кольца — цельный, спокойный образ.'}</div>
+  <button class="btn" id="toCheck" style="width:100%;margin-top:8px">+ Добавить в «Проверь образ»</button>`;
+ res.querySelectorAll('#moods .pill').forEach(b=>b.onclick=()=>{mood=b.dataset.m;renderPair()});
+ document.getElementById('toCheck').onclick=()=>{addPicked(pairColor.hex,pairColor.name,pairColor.ring);show('check')};
+}
+
+/* ---------- вкладки ---------- */
+function show(t){document.querySelectorAll('section').forEach(s=>s.classList.toggle('hidden',s.id!==t));
+ document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+
+/* ---------- свой цвет / фото ---------- */
+document.getElementById('custom').onchange=e=>{const c=classify(e.target.value);addPicked(e.target.value,c.name,c.ring)};
+document.getElementById('clear').onclick=()=>{picked=[];renderCheck()};
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+document.getElementById('photo').onchange=e=>{const f=e.target.files[0];if(!f)return;const img=new Image();
+ img.onload=()=>{const k=Math.min(1,900/img.width);cv.width=img.width*k;cv.height=img.height*k;ctx.drawImage(img,0,0,cv.width,cv.height);cv.style.display='block';document.getElementById('cvhint').style.display='block';URL.revokeObjectURL(img.src)};
+ img.src=URL.createObjectURL(f)};
+cv.addEventListener('pointerdown',e=>{const rc=cv.getBoundingClientRect();const x=(e.clientX-rc.left)*cv.width/rc.width,y=(e.clientY-rc.top)*cv.height/rc.height;
+ // берём участок ~3% ширины фото и медиану по каждому каналу — блики и мелкий узор не сбивают цвет
+ const R=Math.max(6,Math.round(cv.width*0.015));const x0=Math.max(0,Math.round(x-R)),y0=Math.max(0,Math.round(y-R));
+ const d=ctx.getImageData(x0,y0,Math.min(2*R,cv.width-x0),Math.min(2*R,cv.height-y0)).data;const ch=[[],[],[]];
+ for(let i=0;i<d.length;i+=4){ch[0].push(d[i]);ch[1].push(d[i+1]);ch[2].push(d[i+2])}
+ const med=a=>{a.sort((p,q)=>p-q);return a[a.length>>1]};
+ const hex='#'+ch.map(a=>med(a).toString(16).padStart(2,'0')).join('');const c=classify(hex);addPicked(hex,c.name,c.ring);
+ // подсказка внизу: что добавилось и куда смотреть
+ const t=document.getElementById('toast');document.getElementById('toastTxt').innerHTML=`<b>${c.name.replace('≈ ','')}</b> · кольцо ${c.ring}<br><small>${picked.length<2?'нажмите ещё на одну вещь':'вещей: '+picked.length}</small>`;
+ document.getElementById('toastGo').style.display=picked.length<2?'none':'inline-block';
+ t.classList.remove('hidden');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.add('hidden'),5000)});
+document.getElementById('toastGo').onclick=()=>{document.getElementById('toast').classList.add('hidden');document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'})};
+
+/* ---------- старт ---------- */
+drawWheel();ringsInfo();
+const pal=document.getElementById('palette');pal.innerHTML=swatches();bindDots(pal,addPicked);
+renderCheck();renderPair();
+const h=(location.hash||'').slice(1);if(['wheel','check'].includes(h))show(h);
+if('serviceWorker' in navigator && location.protocol!=='file:'){navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window._reloaded){window._reloaded=1;location.reload()}})}
+</script>
+</body>
+</html>
