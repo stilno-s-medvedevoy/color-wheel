@@ -148,6 +148,10 @@ function classify(hex){
  const [h,s,l]=hex2hsl(hex);
  // фото: тёплый/холодный свет даёт белому и чёрному лёгкий оттенок — почти бесцветное считаем белым/серым/чёрным
  const chroma=(()=>{const c=rgb(hex);return (Math.max(...c)-Math.min(...c))/255})();
+ // тёмно-коричневое (кожа, колготки, шоколад) отличаем от чёрного по тёплому оттенку
+ const warm=(h<=50||h>=330);
+ if(l<0.36 && warm && chroma>=0.06 && l>=0.07) return {ring:2,name:l<0.2?"≈ Тёмный шоколад":"≈ Коричневый"};
+ if(l<0.36 && !warm && chroma>=0.09 && h>=200 && h<=260) return {ring:2,name:"≈ Тёмно-синий (нэви)"};
  if(l<0.16 || (l<0.24&&chroma<0.08)) return {ring:1,name:"≈ Чёрный"};
  if(l>0.78 && chroma<0.16) return {ring:2,name:"≈ Белый"};
  if(l>0.68 && chroma<0.10) return {ring:2,name:"≈ Светло-серый"};
@@ -251,8 +255,21 @@ function bindDots(container, fn){container.querySelectorAll('.dot').forEach(b=>b
 function addPicked(hex,name,ring){if(picked.length>=6)picked.shift();picked.push({hex,name,ring});renderCheck()}
 function renderCheck(){
  const box=document.getElementById('picked');
- box.innerHTML=picked.length?picked.map((p,i)=>`<span class="chip"><i style="background:${p.hex}"></i><span>${p.name}<br><b>кольцо ${p.ring}</b></span><button data-i="${i}">×</button></span>`).join(''):'<span class="muted">Пока пусто</span>';
- box.querySelectorAll('button').forEach(b=>b.onclick=()=>{picked.splice(+b.dataset.i,1);renderCheck()});
+ box.innerHTML=picked.length?picked.map((p,i)=>`<span class="chip" data-c="${i}"><i style="background:${p.hex}"></i><span>${p.name}<br><b>кольцо ${p.ring}</b> <small style="color:var(--mute)">· уточнить</small></span><button data-i="${i}">×</button></span>`).join('')
+   +(picked.some(p=>hex2hsl(p.hex)[2]<0.3)?'<div class="muted" style="width:100%">Тёмные цвета на фото трудно различить: если цвет не тот, нажмите на него и выберите точный.</div>':'')
+   :'<span class="muted">Пока пусто</span>';
+ box.querySelectorAll('button[data-i]').forEach(b=>b.onclick=e=>{e.stopPropagation();picked.splice(+b.dataset.i,1);renderCheck()});
+ // нажатие на вещь — выбрать точный цвет из похожих
+ box.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{
+  const i=+ch.dataset.c,p=picked[i],a=rgb(p.hex);
+  const all=[];for(const r of ORDER)for(const c of RINGS[r].colors){const b=rgb(c[1]);all.push({n:c[0],h:c[1],r:+r,d:(a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2})}
+  const opts=all.sort((x,y)=>x.d-y.d).slice(0,8);
+  const old=box.querySelector('.fix');if(old)old.remove();
+  const div=document.createElement('div');div.className='fix';div.style.width='100%';
+  div.innerHTML=`<div class="muted">Какой это цвет на самом деле?</div><div class="sw">${opts.map(o=>`<button class="dot" data-h="${o.h}" data-n="${o.n}" data-r="${o.r}"><i style="background:${o.h}"></i>${o.n}</button>`).join('')}</div>`;
+  ch.after(div);
+  div.querySelectorAll('.dot').forEach(d=>d.onclick=()=>{picked[i]={hex:d.dataset.h,name:d.dataset.n,ring:+d.dataset.r};renderCheck()});
+ });
  const res=document.getElementById('result');
  document.getElementById('pickedTitle').style.display=picked.length?'block':'none';
  if(picked.length<1){res.innerHTML='<div class="step" style="margin:0"><b>3.</b> Здесь появится разбор: какое настроение у образа и как его подправить.</div>';return}
