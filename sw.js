@@ -1,6 +1,6 @@
 // Offline support. Pages: network first, so updates show up immediately; cache is the fallback offline.
 // Images/fonts: cache first.
-const CACHE = "color-wheel-v15";
+const CACHE = "color-wheel-v16";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(

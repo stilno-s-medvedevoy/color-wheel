@@ -81,7 +81,7 @@ footer{margin-top:28px;color:var(--mute);font-size:15px;text-align:center}
   <!-- КРУГ + ПАРА -->
   <section id="wheel">
     <svg id="svgwheel" viewBox="-160 -160 320 320"></svg>
-    <div class="hint" id="whint">Нажмите на цвет вашей вещи 👆</div>
+    <div class="hint" id="whint">Нажмите на цвет вашей вещи 👆<br><small style="font-weight:500;color:var(--mute)">кольца можно крутить пальцем</small></div><div style="text-align:center;margin-top:6px"><button class="btn ghost" onclick="window._resetWheel&&window._resetWheel()">↺ Вернуть как в книге</button></div>
     <div class="card res hidden" id="pairRes"></div>
     <details class="card"><summary style="font-weight:700">Что значат 4 кольца</summary><div id="rings"></div></details>
   </section>
@@ -113,13 +113,13 @@ footer{margin-top:28px;color:var(--mute);font-size:15px;text-align:center}
 <script>
 const RINGS = {
  1:{name:"Чёрный", mood:"сильный, резкий, графичный",
-    colors:[["Чёрный","#1A1D1D"]]},
+    colors:[["Чёрный","#1F2A28"]]},
  2:{name:"Классические нейтрали", mood:"предсказуемо, чётко, надёжно",
-    colors:[["Серо-коричневый","#6E6253"],["Графит","#3B3F42"],["Светло-серый","#A9A6A8"],["Белый","#F4F2EE"],["Стоун","#D3CBBF"],["Грейдж","#A39886"],["Серо-лиловый","#8F8285"],["Нэви","#26303F"]]},
+    colors:[["Тёплый тауп","#7A705C"],["Графит","#3A3F3E"],["Светло-серый","#A9A4A2"],["Белый","#EEEBE5"],["Стоун","#C8BCAB"],["Серо-лиловый","#8A7678"],["Тёмно-серый","#3D4242"],["Серая олива","#6D6A5C"]]},
  3:{name:"Цвета «без названия»", mood:"спокойно, тонко, «клей гардероба»",
-    colors:[["Серый шалфей","#8F9A92"],["Олива","#7C7A5A"],["Горчица","#C29A3A"],["Абрикос","#E3A35E"],["Тыквенный","#D6843A"],["Ржавый","#B5562A"],["Кирпич","#8F3A22"],["Каштан","#6E2A1C"],["Оксблад","#5C1D1F"],["Бордо","#4A1820"],["Тёмная слива","#3D1F26"],["Баклажан","#4A3340"],["Пыльная слива","#7A5F6E"],["Пыльный лиловый","#8E7F9A"],["Лавандово-серый","#7D7F9F"],["Пыльный голубой","#9FB4C7"]]},
+    colors:[["Серый шалфей","#8F988C"],["Олива","#7D7B58"],["Горчица","#C39A3E"],["Абрикос","#E2A05A"],["Тыквенный","#D27A2C"],["Ржавый","#B4562A"],["Кирпич","#8C3A22"],["Каштан","#6C2A1E"],["Оксблад","#4F1A17"],["Бордо","#4A1B1F"],["Тёмная слива","#3A2427"],["Баклажан","#5A4A55"],["Пыльный лиловый","#7E7598"],["Пыльный голубой","#9FB2C4"],["Серо-голубой","#8E9B98"],["Светлый шалфей","#A1AA9F"]]},
  4:{name:"Яркие", mood:"радостно, энергично, заметно",
-    colors:[["Розовый","#E8508A"],["Зелёный","#1F8F4A"],["Оранжевый","#F07A1A"],["Мандариновый","#F0581C"],["Красный","#D9202A"],["Жёлтый","#F2D21B"],["Голубой","#2F8BE0"],["Кобальт","#2B4FB8"],["Фиолетовый","#9A5AB8"]]}
+    colors:[["Розовый","#E8508A"],["Зелёный","#1F8F4A"],["Оранжевый","#F07A1A"],["Красный","#DC2224"],["Жёлтый","#F0D01C"],["Голубой","#2F8BE0"],["Кобальт","#3A48B0"],["Фиолетовый","#9A5AB8"]]}
 };
 const COMBO = {
  "1":["Монохром в чёрном","строго и графично","Чтобы не было плоско — добавьте фактуру или одну вещь из кольца 3."],
@@ -186,7 +186,7 @@ function drawWheel(){
  const svg=document.getElementById('svgwheel');
  // Стопка матовых дисков, как у физического круга: снизу самый большой (кольцо 4), сверху меньше, в центре чёрная «шляпка».
  // У каждого диска своя неподвижная тень (видно, что слои лежат друг на друге) и свой поворот.
- const R_OUT={1:30,2:70,3:116,4:152};
+ const R_OUT={1:34,2:88,3:138,4:152};
  const p=(rad,a)=>[rad*Math.cos(a),rad*Math.sin(a)];
  const wedge=(r0,r1,a0,a1)=>{const [x0,y0]=p(r1,a0),[x1,y1]=p(r1,a1),[x2,y2]=p(r0,a1),[x3,y3]=p(r0,a0);
    return `M${x0},${y0}A${r1},${r1} 0 0 1 ${x1},${y1}L${x2},${y2}A${r0},${r0} 0 0 0 ${x3},${y3}Z`};
@@ -199,11 +199,11 @@ function drawWheel(){
   if(r==="1"){const c=RINGS[1].colors[0];
    html=`<circle class="hit" r="34" fill="url(#cap)" data-h="${c[1]}" data-n="${c[0]}" data-r="1"/>`}
   else{const cols=RINGS[r].colors,n=cols.length;
-   cols.forEach((c,i)=>{const a0=i/n*2*Math.PI-Math.PI/2,a1=(i+1)/n*2*Math.PI-Math.PI/2;
+   cols.forEach((c,i)=>{const OFF=-Math.PI/2-3.5*Math.PI/180,a0=i/n*2*Math.PI+OFF,a1=(i+1)/n*2*Math.PI+OFF;
     // видимая часть сегмента; под верхним диском он продолжается внутрь (без щелей при вращении)
     html+=`<path class="seg" d="${wedge(Math.max(0,r0-6),r1,a0,a1)}" fill="${c[1]}" pointer-events="none"/>`;
     html+=`<path d="${wedge(r0,r1,a0,a1)}" data-h="${c[1]}" data-n="${c[0]}" data-r="${r}"><title>${c[0]} · кольцо ${r}</title></path>`});
-   html+=`<g stroke="rgba(255,255,255,.35)" stroke-width=".7" pointer-events="none">${cols.map((_,i)=>{const a=i/n*2*Math.PI-Math.PI/2;const [x,y]=p(r1,a),[x2,y2]=p(r0,a);return `<line x1="${x2}" y1="${y2}" x2="${x}" y2="${y}"/>`}).join('')}</g>`;
+   html+=`<g stroke="rgba(255,255,255,.35)" stroke-width=".7" pointer-events="none">${cols.map((_,i)=>{const a=i/n*2*Math.PI-Math.PI/2-3.5*Math.PI/180;const [x,y]=p(r1,a),[x2,y2]=p(r0,a);return `<line x1="${x2}" y1="${y2}" x2="${x}" y2="${y}"/>`}).join('')}</g>`;
   }
   // кромка диска: светлый ободок даёт толщину
   html+=`<circle r="${r1-.6}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2" pointer-events="none"/>`;
@@ -213,8 +213,8 @@ function drawWheel(){
   <filter id="blurL" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
   <filter id="blurS" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
   <radialGradient id="cap" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#3a3a3a"/><stop offset=".6" stop-color="#1c1c1c"/><stop offset="1" stop-color="#111"/></radialGradient>
-  <radialGradient id="light" cx="35%" cy="25%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></radialGradient>
-  <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".1"/></feComponentTransfer></filter>
+  <radialGradient id="light" cx="35%" cy="25%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".10"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></radialGradient>
+  <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".06"/></feComponentTransfer></filter>
   <clipPath id="disc"><circle r="152"/></clipPath>
  </defs>${out}
  <g pointer-events="none" clip-path="url(#disc)"><circle r="152" fill="url(#light)"/><rect x="-152" y="-152" width="304" height="304" filter="url(#grain)" style="mix-blend-mode:multiply"/></g>`;
@@ -223,15 +223,16 @@ function drawWheel(){
 /* ---------- вращение круга: сам медленно крутится, пальцем — с инерцией, тап выбирает цвет ---------- */
 function initSpin(svg){
  // у каждого кольца свой угол, скорость и направление
- const R={};svg.querySelectorAll('.ringL').forEach(g=>{const k=+g.dataset.ring;R[k]={g,ang:0,vel:0,auto:{1:0.05,2:0.07,3:-0.05,4:0.035}[k]}});
+ const R={};svg.querySelectorAll('.ringL').forEach(g=>{const k=+g.dataset.ring;R[k]={g,ang:0,vel:0,auto:0}});
  let drag=null,last=null,lastT=0,moved=0,startEl=null,idle=true,idleTimer=null;
  const center=()=>{const r=svg.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2,r.width/320]};
  const angleAt=e=>{const [cx,cy]=center();return Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI};
- const ringAt=e=>{const [cx,cy,k]=center();const d=Math.hypot(e.clientX-cx,e.clientY-cy)/k;return d<31?1:d<71?2:d<117?3:4};
+ const ringAt=e=>{const [cx,cy,k]=center();const d=Math.hypot(e.clientX-cx,e.clientY-cy)/k;return d<35?1:d<89?2:d<139?3:4};
  const apply=o=>o.g.setAttribute('transform',`rotate(${o.ang})`);
  function frame(){
   for(const k in R){const o=R[k];if(drag===o)continue;
-   if(Math.abs(o.vel)>0.02){o.ang+=o.vel;o.vel*=0.95} else if(idle){o.ang+=o.auto} apply(o)}
+   // перерисовываем только то кольцо, которое реально движется (экономит батарею и не грузит телефон)
+   if(Math.abs(o.vel)>0.02){o.ang+=o.vel;o.vel*=0.95;apply(o)} else if(idle&&o.auto){o.ang+=o.auto;apply(o)}}
   requestAnimationFrame(frame)}
  svg.addEventListener('pointerdown',e=>{drag=R[ringAt(e)];idle=false;clearTimeout(idleTimer);drag.vel=0;last=angleAt(e);lastT=performance.now();moved=0;
   startEl=e.target.closest('[data-h]');svg.setPointerCapture(e.pointerId)});
@@ -245,7 +246,7 @@ function initSpin(svg){
   pairColor={hex:el.dataset.h,name:el.dataset.n,ring:+el.dataset.r};renderPair();
   document.getElementById('pairRes').scrollIntoView({behavior:'smooth',block:'start'})}
  // приветственный оборот: кольца раскручиваются в разные стороны
- R[2].vel=5;R[3].vel=-6;R[4].vel=4;requestAnimationFrame(frame);
+ requestAnimationFrame(frame);window._resetWheel=()=>{for(const k in R){R[k].vel=0;R[k].ang=0;apply(R[k])}};
 }
 function ringsInfo(){
  document.getElementById('rings').innerHTML=ORDER.map(r=>`<div style="margin-top:14px"><div class="ring"><span class="num">${r}</span><span class="rname">${RINGS[r].name}</span></div>
