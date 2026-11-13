@@ -184,7 +184,7 @@ function drawWheel(){
  const svg=document.getElementById('svgwheel');
  // Стопка матовых дисков, как у физического круга: снизу самый большой (кольцо 4), сверху меньше, в центре чёрная «шляпка».
  // У каждого диска своя неподвижная тень (видно, что слои лежат друг на друге) и свой поворот.
- const R_OUT={1:32,2:76,3:128,4:152};
+ const R_OUT={1:30,2:70,3:116,4:152};
  const p=(rad,a)=>[rad*Math.cos(a),rad*Math.sin(a)];
  const wedge=(r0,r1,a0,a1)=>{const [x0,y0]=p(r1,a0),[x1,y1]=p(r1,a1),[x2,y2]=p(r0,a1),[x3,y3]=p(r0,a0);
    return `M${x0},${y0}A${r1},${r1} 0 0 1 ${x1},${y1}L${x2},${y2}A${r0},${r0} 0 0 0 ${x3},${y3}Z`};
@@ -225,7 +225,7 @@ function initSpin(svg){
  let drag=null,last=null,lastT=0,moved=0,startEl=null,idle=true,idleTimer=null;
  const center=()=>{const r=svg.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2,r.width/320]};
  const angleAt=e=>{const [cx,cy]=center();return Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI};
- const ringAt=e=>{const [cx,cy,k]=center();const d=Math.hypot(e.clientX-cx,e.clientY-cy)/k;return d<33?1:d<77?2:d<129?3:4};
+ const ringAt=e=>{const [cx,cy,k]=center();const d=Math.hypot(e.clientX-cx,e.clientY-cy)/k;return d<31?1:d<71?2:d<117?3:4};
  const apply=o=>o.g.setAttribute('transform',`rotate(${o.ang})`);
  function frame(){
   for(const k in R){const o=R[k];if(drag===o)continue;
