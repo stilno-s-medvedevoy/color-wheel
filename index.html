@@ -134,6 +134,8 @@ const COMBO = {
  "3-4":["Мягкий акцент","яркое смягчено, появляется глубина","Например, красное платье + обувь цвета бордо."]
 };
 const ORDER = ["1","2","3","4"];
+// «Яркие всегда сочетаются с этими нейтралями» — разворот из книги Эми Смилович
+const ALWAYS = [["Графит","#3F3A3D"],["Тёмная слива","#2E1420"],["Кэмел","#8F7550"],["Тёмная олива","#4A3A10"],["Серый","#5C5B58"],["Бордово-коричневый","#6B3A3E"],["Почти чёрный","#33362F"],["Светло-серый","#8E8E8B"]];
 let picked = [];
 let pairColor = null, mood = "calm";
 
@@ -285,6 +287,9 @@ function renderCheck(){
  if(rings.length===3){const mid=rings[1];tips.push(`Кольцо ${mid} работает как связка между ${mn} и ${mx} — образ становится цельнее.`)}
  if(dist<=1&&r4===0) tips.push('Кажется плоским? «Перепрыгните» кольцо или добавьте кольцо 4.');
  if(rings.includes(1)&&rings.includes(4)) tips.push('Слишком громко? Замените одну вещь на кольцо 3 — энергия станет мягче.');
+ // из книги Эми: близкие оттенки держит фактура; белая обувь — спасение для контраста
+ if(dist<=1) tips.push('Оттенки близкие — тогда главное фактура: ворс, замша, кожа, трикотаж рядом. А яркая белая обувь спасает, когда не хватает контраста.');
+ if(rings.length===4) tips.push('Все четыре кольца в одном образе — сложно и интересно. Связать их помогает микс фактур.');
  res.innerHTML=`<div class="sub">Разбор образа · кольца ${rings.join(' + ')}</div><h3>${title}</h3><div style="font-size:21px">Ваш образ читается так: <b>${feel}</b></div>
   <div class="meter"><span style="left:${Math.max(4,energy)}%"></span></div><div class="scale"><span>спокойно</span><span>классика</span><span>смело</span></div>
   ${tips.map(t=>`<div class="tip">${t}</div>`).join('')}<div class="tip">${otn}</div>`;
@@ -305,6 +310,8 @@ function renderPair(){
   ${targets.map(t=>{const key=[r,t].sort().join('-');const c=r===t?COMBO[String(r)]:COMBO[key];
    return `<div style="margin-top:16px"><div style="font:600 34px/1.1 'Cormorant Garamond',serif">${c?c[0]:''}</div><div class="rdesc">${c?c[1]:''} · кольцо ${t}</div>
    <div class="sw">${RINGS[t].colors.filter(c=>c[1]!==pairColor.hex).map(c=>`<span class="dot"><i style="background:${c[1]}"></i>${c[0]}</span>`).join('')}</div></div>`}).join('')}
+  ${r===4?`<div style="margin-top:18px"><div style="font:600 34px/1.1 'Cormorant Garamond',serif">Всегда работает</div><div class="rdesc">по книге Эми: яркий цвет всегда сочетается с этими нейтралями — вне трендов</div>
+   <div class="sw">${ALWAYS.map(c=>`<span class="dot"><i style="background:${c[1]}"></i>${c[0]}</span>`).join('')}</div></div>`:''}
   <div class="tip">${mood==='bold'?'Яркой вещи нужен чёткий крой. Если слишком — смягчите аксессуаром кольца 3.':mood==='classic'?'Через одно кольцо — заметно, но без перегруза.':'Соседние кольца — цельный, спокойный образ.'}</div>
   <button class="btn" id="toCheck" style="width:100%;margin-top:8px">+ Добавить в «Проверь образ»</button>`;
  res.querySelectorAll('#moods .pill').forEach(b=>b.onclick=()=>{mood=b.dataset.m;renderPair()});
