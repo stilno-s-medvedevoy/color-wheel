@@ -66,6 +66,17 @@ canvas{width:100%;border-radius:12px;touch-action:none;display:none}
 .muted{color:var(--mute);font-size:19px}
 footer{margin-top:28px;color:var(--mute);font-size:15px;text-align:center}
 .hidden{display:none}
+.tabs button{font-size:17px;padding:14px 4px}
+.ex{display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap}
+.ex span{flex:1;min-width:64px;text-align:center;font-size:15px;color:var(--mute);line-height:1.2}
+.ex i{display:block;height:56px;border-radius:12px;margin-bottom:4px;border:1px solid rgba(0,0,0,.08)}
+.rb{display:inline-flex;gap:4px;vertical-align:middle;margin-right:6px}
+.rb b{font:700 14px Manrope;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;justify-content:center}
+.lesson{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.lesson h4{font:600 30px/1.1 "Cormorant Garamond",serif;margin:0 0 4px}
+.pal{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}
+.pal i{display:block;aspect-ratio:1.4;border-radius:10px}
+.big3{font:600 34px/1 "Cormorant Garamond",serif;letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -76,6 +87,7 @@ footer{margin-top:28px;color:var(--mute);font-size:15px;text-align:center}
   <div class="tabs">
     <button data-t="wheel" class="on">С чем носить</button>
     <button data-t="check">Проверь образ</button>
+    <button data-t="book">Правила</button>
   </div>
 
   <!-- КРУГ + ПАРА -->
@@ -106,6 +118,9 @@ footer{margin-top:28px;color:var(--mute);font-size:15px;text-align:center}
     <div id="toast" class="toast hidden"><span id="toastTxt"></span><button id="toastGo">Смотреть разбор ↓</button></div>
   </section>
 
+
+  <!-- ПРАВИЛА ИЗ КНИГИ -->
+  <section id="book" class="hidden"><div id="bookBody"></div></section>
 
   <footer>По мотивам принципа колец Эми Смилович (Tibi). Подсказки — ориентир, а не закон: круг можно «крутить».</footer>
 </div>
@@ -203,7 +218,7 @@ function drawWheel(){
     // видимая часть сегмента; под верхним диском он продолжается внутрь (без щелей при вращении)
     html+=`<path class="seg" d="${wedge(Math.max(0,r0-6),r1,a0,a1)}" fill="${c[1]}" pointer-events="none"/>`;
     html+=`<path d="${wedge(r0,r1,a0,a1)}" data-h="${c[1]}" data-n="${c[0]}" data-r="${r}"><title>${c[0]} · кольцо ${r}</title></path>`});
-   html+=`<g stroke="rgba(255,255,255,.35)" stroke-width=".7" pointer-events="none">${cols.map((_,i)=>{const a=i/n*2*Math.PI-Math.PI/2-3.5*Math.PI/180;const [x,y]=p(r1,a),[x2,y2]=p(r0,a);return `<line x1="${x2}" y1="${y2}" x2="${x}" y2="${y}"/>`}).join('')}</g>`;
+   html+=`<g stroke="rgba(255,255,255,.35)" stroke-width=".7" pointer-events="none">${cols.map((_,i)=>{const a=i/n*2*Math.PI-Math.PI/2;const [x,y]=p(r1,a),[x2,y2]=p(r0,a);return `<line x1="${x2}" y1="${y2}" x2="${x}" y2="${y}"/>`}).join('')}</g>`;
   }
   // кромка диска: светлый ободок даёт толщину
   html+=`<circle r="${r1-.6}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2" pointer-events="none"/>`;
@@ -283,7 +298,7 @@ function renderCheck(){
  const [title,feel,advice]=COMBO[key];
  const r4=picked.filter(p=>p.ring===4).length;
  const energy=Math.min(100,dist*28+r4*10+(rings.includes(1)&&rings.includes(4)?6:0));
- let otn=r4===0?"«None» — без цветного акцента, тонально.":r4===1?"«One» — один цветной акцент: глаз сразу находит фокус.":r4===2?"Два ярких акцента могут спорить: оставьте один — или добавьте ещё, чтобы получилась «тонна».":"«Ton» — много цвета, и он читается цельно.";
+ let otn=r4===0?"«None» — без цветного акцента, тонально.":r4===1?"«One» — один цветной акцент: глаз сразу находит фокус.":r4===2?"Два ярких акцента спорят — образ выглядит «как с манекена». Оставьте один (One) или добавьте ещё, чтобы получилась «тонна» (Ton). Подробнее — во вкладке «Правила».":"«Ton» — много цвета, и он читается цельно.";
  let tips=[advice];
  if(rings.length===3){const mid=rings[1];tips.push(`Кольцо ${mid} работает как связка между ${mn} и ${mx} — образ становится цельнее.`)}
  if(dist<=1&&r4===0) tips.push('Кажется плоским? «Перепрыгните» кольцо или добавьте кольцо 4.');
@@ -345,11 +360,64 @@ cv.addEventListener('pointerdown',e=>{const rc=cv.getBoundingClientRect();const 
  t.classList.remove('hidden');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.add('hidden'),5000)});
 document.getElementById('toastGo').onclick=()=>{document.getElementById('toast').classList.add('hidden');document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'})};
 
+/* ---------- правила из книги: цветовая математика и One / Ton / None ---------- */
+function bookPage(){
+ const rb=(...n)=>`<span class="rb">${n.map(x=>`<b>${x}</b>`).join('')}</span>`;
+ const ex=items=>`<div class="ex">${items.map(([n,h])=>`<span><i style="background:${h}"></i>${n}</span>`).join('')}</div>`;
+ const pal=a=>`<div class="pal">${a.map(h=>`<i style="background:${h}"></i>`).join('')}</div>`;
+ const L=(rings,title,text,items)=>`<div class="lesson"><div>${rings}</div><h4>${title}</h4><div style="font-size:19px">${text}</div>${items?ex(items):''}</div>`;
+ document.getElementById('bookBody').innerHTML=`
+ <div class="card">
+  <h2>Как смешивать кольца</h2>
+  <div class="tip">Носите много чёрного — двигайтесь от центра <b>наружу</b>. Много ярких вещей — двигайтесь <b>внутрь</b>. Ничего не выбрасывайте: просто добавляйте новые оттенки к тому, что есть.</div>
+  ${L(rb(1),'Только чёрный','Шикарно, но всё держится на фактурах, открытой коже, серьгах и обуви. Каждый день — быстро надоедает: это и есть «чёрная колея».',[['жакет','#1a1a1a'],['брюки','#222'],['босоножки','#111']])}
+  ${L(rb(1,2),'Чёрный + нейтрали','Самая простая математика: 1 + 2 = хорошо. Шик без риска и первый шаг из чёрного.',[['жакет нэви','#1F2A4A'],['брюки','#1a1a1a'],['шарф','#6B3E1E']])}
+  ${L(rb(2),'Только нейтрали','Начните спокойно, слоями. Добавьте разные фактуры — у образа появится глубина.',[['пальто кэмел','#A98A62'],['брюки','#4B2C17'],['топ','#E9E2D4']])}
+  ${L(rb(2,3,4),'Уровень мастера','Нейтрали + «цвета без названия» + один элемент яркого. Выглядит сложно, а носится легко. Поздравляем, вы вышли из чёрной колеи!',[['жакет нэви','#1F2A4A'],['брюки','#8E8E8B'],['пояс','#B97F0B'],['серьга','#CD0B1B']])}
+  ${L(rb(2,3,4),'Один смелый цвет','Одного сильного цвета хватает, чтобы образ стал очень стильным. Остальное — спокойная база.',[['кардиган','#4090CD'],['жакет','#1F2A4A'],['юбка','#1F6B3A'],['туфли','#4090CD']])}
+  ${L(rb(4),'Цвет на полную','Яркое с ярким — смело и празднично. Модный момент, но не на каждый день.',[['топ','#A880C8'],['жакет','#9CCB6A'],['юбка','#E5D102'],['обувь','#CD0B1B']])}
+  ${L(rb(3,4),'Замените одну яркую вещь','Поставьте вместо неё цвет кольца 3 — образ сразу тоньше и шикарнее, аксессуары становятся заметнее.',[['топ','#A880C8'],['юбка олива','#52573B'],['пояс','#B0ACA2']])}
+  ${L(rb(2,4),'Нейтраль + яркое','Нейтральная вещь растягивает яркую и делает её носибельной.',[['топ кэмел','#C08A5A'],['юбка','#E5D102'],['сандалии','#4B2C17']])}
+  <div class="tip">⚠️ Прыжок из кольца 4 сразу в кольцо 1 — крайность. Для модного образа можно, а на каждый день добавляйте соседние кольца.</div>
+ </div>
+
+ <div class="card">
+  <h2>One, Ton или None</h2>
+  <div style="font-size:19px">Самые стильные люди одеваются так, что глаз <b>успокаивается</b>. Это бывает в трёх случаях:</div>
+  <div class="lesson"><div class="big3">ONE · один</div><div style="font-size:19px">Одна точка внимания: заметная вещь, всё остальное — фон. Глаз сразу идёт туда.</div>${ex([['свитер','#2F8A2A'],['брюки','#1a1a1a'],['носки','#8E8E8B']])}</div>
+  <div class="lesson"><div class="big3">TON · тонна</div><div style="font-size:19px">Много всего, но на одном уровне яркости — как оркестр: инструментов много, а мелодия одна. Глаз видит образ целиком.</div>${ex([['тренч','#E3A6C8'],['сумка','#2F8A2A'],['ремень','#E5D102'],['юбка','#1a1a1a']])}</div>
+  <div class="lesson"><div class="big3">NONE · ничего</div><div style="font-size:19px">Все нейтрали на одном уровне. Интерес — через фактуру: деним, замша, трикотаж, кожа.</div>${ex([['куртка деним','#3A5A8C'],['джинсы','#1F2A4A'],['сумка','#8A3A1A'],['лоферы','#6B3E1E']])}</div>
+  <div class="tip"><b>Главное — не «два».</b> Один акцент — это стиль. Два — образ как с манекена в магазине: смотрят на одежду, а не на вас.</div>
+  ${ex([['серый костюм','#6A6A6A'],['+ жёлтый шарф','#E5D102'],['= ONE ✓','#F7F2EB']])}
+  ${ex([['серый костюм','#6A6A6A'],['+ голубой жакет','#4090CD'],['+ жёлтый шарф','#E5D102'],['= два ✗','#F7F2EB']])}
+  <div class="lesson"><h4>Подсказки</h4>
+   <div class="tip">Фактура делает переход от None к Ton интереснее: пушистый свитер вместо гладкого.</div>
+   <div class="tip">Любимая вещь — футболка с принтом, бабушкин свитер — может стать вашим One.</div>
+   <div class="tip">Аксессуар создаёт One (красные носки к деним-образу) или добавляет энергии в Ton.</div>
+   <div class="tip">Принт: если он не тянет взгляд — это «непринтовый принт», он для None. Сомневаетесь, принт ли это, — значит, спокойный.</div>
+   <div class="tip">Вы можете быть и None, и Ton в одном гардеробе: человек тот же, просто разное настроение.</div>
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>Цвет по номерам</h2>
+  <div class="muted">Палитры из книги — для вдохновения при сборе гардероба.</div>
+  <div class="lesson"><div class="big3">NONE · светлый</div><div style="font-size:19px">Белый с оттенками белого и нейтралей — шик. Особенно с игрой пропорций.</div>
+   ${pal(['#B89C66','#6E6068','#B8B6BC','#7E7E86','#383A44','#A88E96','#DCD6D0','#D8D0BE','#C4A698','#B85A20'])}</div>
+  <div class="lesson"><div class="big3">NONE · глубокий</div><div style="font-size:19px">Нейтрали шире чёрного и белого: нэви, шоколад, тауп, оливково-серый — у стиля появляется глубина.</div>
+   ${pal(['#1E2232','#1C1C1C','#8E7766','#BAB8BA','#20222E','#7A4220','#1E3054','#3E2E22','#4A4844','#C08A20'])}</div>
+  <div class="lesson"><div class="big3">ONE</div><div style="font-size:19px">Пять нейтралей + один яркий цвет — взгляд идёт в одну точку.</div>
+   ${pal(['#A8A8AA','#9A9E94','#221E1E','#7A3A1A','#1C1C20','#2840A8','#E8C820','#D8381C','#3A9A38','#D8202A'])}</div>
+  <div class="lesson"><div class="big3">TON</div><div style="font-size:19px">Яркость одного уровня — глаз видит весь образ, а не одно-два пятна.</div>
+   ${pal(['#E02828','#C82898','#E8C828','#F0A020','#90C8A8','#A880C8','#7A6460','#2A1E1C','#A0381C','#1E3A28'])}</div>
+ </div>`;
+}
+bookPage();
 /* ---------- старт ---------- */
 drawWheel();ringsInfo();
 const pal=document.getElementById('palette');pal.innerHTML=swatches();bindDots(pal,addPicked);
 renderCheck();renderPair();
-const h=(location.hash||'').slice(1);if(['wheel','check'].includes(h))show(h);
+const h=(location.hash||'').slice(1);if(['wheel','check','book'].includes(h))show(h);
 if('serviceWorker' in navigator && location.protocol!=='file:'){navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window._reloaded){window._reloaded=1;location.reload()}})}
 </script>
 </body>
